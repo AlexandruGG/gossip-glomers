@@ -9,11 +9,17 @@ class Handler(private val json: Json) {
 
     fun run() {
         generateSequence(::readln).forEach {
-            val inbound = decodeInbound(it)
+            val inbound = decode(it)
             val outbound = inbound.reply()
 
             send(outbound)
         }
+    }
+
+    private fun decode(inbound: String) = try {
+        json.decodeFromString<Message>(inbound).also { log("Received inbound: $inbound") }
+    } catch (e: Exception) {
+        throw e.also { log("Failed to decode message: $inbound. Exception: $e") }
     }
 
     private fun send(outbound: Message) {
@@ -24,12 +30,6 @@ class Handler(private val json: Json) {
         }
 
         println(encoded)
-    }
-
-    private fun decodeInbound(message: String) = try {
-        json.decodeFromString<Message>(message).also { log("Received inbound: $message") }
-    } catch (e: Exception) {
-        throw e.also { log("Failed to decode message: $message. Exception: $e") }
     }
 
     private fun log(message: String) {

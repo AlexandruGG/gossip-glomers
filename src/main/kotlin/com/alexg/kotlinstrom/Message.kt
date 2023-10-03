@@ -2,6 +2,7 @@ package com.alexg.kotlinstrom
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.util.UUID
 
 @Serializable
 data class Message(val src: String, val dest: String, val body: Body) {
@@ -50,4 +51,26 @@ data class EchoOk(
     val inReplyTo: Int,
 ) : Body() {
     override fun reply(message: Message) = throw IllegalStateException("Received unexpected EchoOk message!")
+}
+
+@Serializable
+@SerialName("generate")
+data class Generate(val msgId: Int) : Body() {
+    override fun reply(message: Message) = with(message.body as Generate) {
+        message.copy(
+            src = message.dest,
+            dest = message.src,
+            body = GenerateOk(id = UUID.randomUUID().toString(), msgId = msgId + 1, inReplyTo = msgId),
+        )
+    }
+}
+
+@Serializable
+@SerialName("generate_ok")
+data class GenerateOk(
+    val id: String,
+    val msgId: Int,
+    val inReplyTo: Int,
+) : Body() {
+    override fun reply(message: Message) = throw IllegalStateException("Received unexpected GenerateOk message!")
 }
