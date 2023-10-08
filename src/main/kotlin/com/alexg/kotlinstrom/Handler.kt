@@ -5,12 +5,12 @@ import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
 
 @Service
-class Handler(private val json: Json) {
+class Handler(private val json: Json, private val store: InMemoryStore) {
 
     fun run() {
         generateSequence(::readln).forEach {
             val inbound = decode(it)
-            val outbound = inbound.reply()
+            val outbound = inbound.reply(store)
 
             send(outbound)
         }
